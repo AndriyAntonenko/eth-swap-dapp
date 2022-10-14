@@ -1,0 +1,8 @@
+{
+  "name": "eth-swap",
+  "description": "Experimental project to investigate Hardhat and ethers.js abilities",
+  "workspaces": [
+    "smart-contracts",
+    "web-client"
+  ]
+}
