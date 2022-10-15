@@ -53,5 +53,5 @@ export const balancesSlice = createSlice({
   },
 });
 
-export const { startLoading, endLoading, setBalance } = balancesSlice.actions;
+export const { setBalance } = balancesSlice.actions;
 export default balancesSlice.reducer;

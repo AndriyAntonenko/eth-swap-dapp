@@ -5,6 +5,7 @@ import { useBuyTokens } from "./useBuyTokens";
 import { useSellTokens } from "./useSellTokens";
 import { ERC20_TICKER } from "../../../shared/constants/tickers";
 import { fetchBalances } from "../../../shared/state/balances";
+import { fetchExchanges } from "../../../shared/state/exchanges";
 import { useWeb3 } from "../../../web3/useWeb3";
 
 export const useSwap = (swapBox) => {
@@ -21,6 +22,7 @@ export const useSwap = (swapBox) => {
     }
 
     dispatch(fetchBalances({ provider }));
+    dispatch(fetchExchanges({ provider }));
   }, [sellTokens, buyTokens, swapBox, provider, dispatch]);
 
   return swap;
