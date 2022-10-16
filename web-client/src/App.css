@@ -3,6 +3,14 @@
   display: flex;
   justify-content: center;
   margin-top: 10vh;
+  position: relative;
+}
+
+.block_fixed__top-right {
+  position: absolute !important;
+  top: 0;
+  right: 0;
+  margin: 0 !important;
 }
 
 .currency-input {

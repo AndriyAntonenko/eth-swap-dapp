@@ -14,10 +14,12 @@ function App() {
       <Web3Provider>
         <Container className="container_centered">
           <SwapBox />
+          <Segment className="block_fixed__top-right">
+            <Header as="h2">Balances</Header>
+            <Balances />
+          </Segment>
         </Container>
         <Segment>
-          <Header as="h2">Balances</Header>
-          <Balances />
           <Header as="h2">Transactions</Header>
           <ExchangesList />
         </Segment>
