@@ -14,12 +14,9 @@
 }
 
 .currency-input {
-  width: 400px;
+  width: 600px;
 }
 
-.currency-input__message_below {
-  color: grey;
-  position: absolute;
-  bottom: -17px;
-  left: 5px;
+.status-message {
+  width: 600px;
 }

@@ -26,9 +26,12 @@ export const useSwapContract = () => {
      * @param {string} issuer
      * @returns
      */
-    (amount, issuer) => {
-      if (swap) return sellTokens(swap, amount, issuer);
-      throw new Error("Cannot sell tokens");
+    async (amount, issuer) => {
+      if (!swap) throw new Error("Cannot sell tokens");
+      const tx = await swap.sellTokens(amount, {
+        from: issuer,
+      });
+      await tx.wait();
     },
     [swap]
   );
@@ -40,42 +43,19 @@ export const useSwapContract = () => {
      * @param {string} issuer
      * @returns
      */
-    (amount, issuer) => {
-      if (swap) return buyTokens(swap, amount, issuer);
-      throw new Error("Cannot buy tokens");
+    async (amount, issuer) => {
+      if (!swap) throw new Error("Cannot buy tokens");
+      const tx = await swap.buyTokens({
+        from: issuer,
+        value: amount,
+      });
+      await tx.wait();
     },
     [swap]
   );
 
   return { sell, buy, address, rate };
 };
-
-/**
- *
- * @param {import("ethers").Contract} swapContract
- * @param {bigint} amount
- * @param {string} issuer
- */
-async function sellTokens(swapContract, amount, issuer) {
-  const tx = await swapContract.sellTokens(amount, {
-    from: issuer,
-  });
-  await tx.wait();
-}
-
-/**
- *
- * @param {import("ethers").Contract} swapContract
- * @param {bigint} amount
- * @param {string} issuer
- */
-async function buyTokens(swapContract, amount, issuer) {
-  const tx = await swapContract.buyTokens({
-    from: issuer,
-    value: amount,
-  });
-  await tx.wait();
-}
 
 /**
  *

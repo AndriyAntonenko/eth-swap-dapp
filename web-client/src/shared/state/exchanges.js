@@ -7,6 +7,8 @@ const initialState = {
   listLoading: false,
   listLoadingErr: null,
   list: [],
+
+  active: { status: null },
 };
 
 /**
@@ -54,6 +56,11 @@ export const fetchExchanges = createAsyncThunk(
 export const exchangesSlice = createSlice({
   name: "exchanges",
   initialState,
+  reducers: {
+    setActiveStatus: (state, action) => {
+      state.active.status = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(fetchExchanges.pending, (state) => {
       state.listLoading = true;
@@ -71,4 +78,5 @@ export const exchangesSlice = createSlice({
   },
 });
 
+export const { setActiveStatus } = exchangesSlice.actions;
 export default exchangesSlice.reducer;

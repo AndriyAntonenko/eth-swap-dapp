@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 
 import { useBuyTokens } from "./useBuyTokens";
 import { useSellTokens } from "./useSellTokens";
+import { useCurrentStatus } from "./useCurrentStatus";
 import { ERC20_TICKER } from "../../../shared/constants/tickers";
 import { fetchBalances } from "../../../shared/state/balances";
 import { fetchExchanges } from "../../../shared/state/exchanges";
@@ -13,8 +14,12 @@ export const useSwap = (swapBox) => {
   const dispatch = useDispatch();
   const buyTokens = useBuyTokens();
   const sellTokens = useSellTokens();
+  const currentOperationStatus = useCurrentStatus();
 
   const swap = useCallback(async () => {
+    if (currentOperationStatus)
+      return console.error("Another transaction in progress");
+
     if (swapBox.target.ticker === ERC20_TICKER) {
       await buyTokens(swapBox.exchange.amount);
     } else {
@@ -23,7 +28,14 @@ export const useSwap = (swapBox) => {
 
     dispatch(fetchBalances({ provider }));
     dispatch(fetchExchanges({ provider }));
-  }, [sellTokens, buyTokens, swapBox, provider, dispatch]);
+  }, [
+    sellTokens,
+    buyTokens,
+    swapBox,
+    provider,
+    dispatch,
+    currentOperationStatus,
+  ]);
 
   return swap;
 };

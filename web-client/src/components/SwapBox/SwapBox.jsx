@@ -5,11 +5,25 @@ import {
   Input,
   Grid,
   Button,
+  Message,
+  Icon,
 } from "semantic-ui-react";
 
 import { SWAP_OPTIONS } from "./constants";
-import { useSwapBox, useSwap } from "./hooks";
+import { useSwapBox, useSwap, useCurrentStatus } from "./hooks";
 import { useWeb3 } from "../../web3/useWeb3";
+
+const StatusMessage = ({ message }) => {
+  return (
+    <Message className="status-message" compact icon>
+      <Icon name="circle notched" loading />
+      <Message.Content>
+        <Message.Header>Transaction is processing</Message.Header>
+        Current status: {message}
+      </Message.Content>
+    </Message>
+  );
+};
 
 export const SwapBox = () => {
   const { isConnected, connect } = useWeb3();
@@ -22,7 +36,10 @@ export const SwapBox = () => {
     changeTargetTicker,
   } = useSwapBox();
   const swap = useSwap(swapBox);
+  const currentOperationStatus = useCurrentStatus();
 
+  const isLoading = !!currentOperationStatus;
+  const disabled = isLoading || !isConnected;
   return (
     <Segment padded>
       <Header>Exchange</Header>
@@ -35,7 +52,7 @@ export const SwapBox = () => {
             action
             onChange={changeExchangeAmount}
             value={formatted.exchange.amount}
-            disabled={!isConnected}
+            disabled={disabled}
           >
             <input />
             <Select
@@ -43,9 +60,8 @@ export const SwapBox = () => {
               options={SWAP_OPTIONS}
               value={formatted.exchange.ticker}
               onChange={changeExchangeTicker}
-              disabled={!isConnected}
+              disabled={disabled}
             />
-            <span className="currency-input__message_below">= 10 usd</span>
           </Input>
         </Grid.Row>
         <Grid.Row>
@@ -56,7 +72,7 @@ export const SwapBox = () => {
             action
             onChange={changeTargetAmount}
             value={formatted.target.amount}
-            disabled={!isConnected}
+            disabled={disabled}
           >
             <input />
             <Select
@@ -64,13 +80,13 @@ export const SwapBox = () => {
               options={SWAP_OPTIONS}
               value={formatted.target.ticker}
               onChange={changeTargetTicker}
-              disabled={!isConnected}
+              disabled={disabled}
             />
           </Input>
         </Grid.Row>
         <Grid.Row>
           {isConnected ? (
-            <Button onClick={swap} primary fluid>
+            <Button loading={isLoading} onClick={swap} primary fluid>
               SWAP
             </Button>
           ) : (
@@ -80,6 +96,9 @@ export const SwapBox = () => {
           )}
         </Grid.Row>
       </Grid>
+      {currentOperationStatus && (
+        <StatusMessage message={currentOperationStatus} />
+      )}
     </Segment>
   );
 };

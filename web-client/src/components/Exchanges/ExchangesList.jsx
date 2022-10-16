@@ -29,7 +29,7 @@ export const ExchangesList = () => {
 
       <Table.Body>
         {exchanges.list.map(({ hash, kind, block, amount, rate }) => (
-          <Table.Row>
+          <Table.Row key={hash}>
             <Table.Cell>{kind}</Table.Cell>
             <Table.Cell>{hash}</Table.Cell>
             <Table.Cell>{block}</Table.Cell>
