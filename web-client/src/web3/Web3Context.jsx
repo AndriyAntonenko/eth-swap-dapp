@@ -1,5 +1,5 @@
 import { createContext, useState } from "react";
-import { connectWallet } from "./metamask"
+import { connectWallet } from "./metamask";
 
 export const Web3Context = createContext(null);
 
@@ -10,5 +10,11 @@ export const Web3Provider = ({ children }) => {
     setProvider(pr);
   };
 
-  return <Web3Context.Provider value={{ connect, provider, isConnected: !!provider }}>{children}</Web3Context.Provider>;
+  return (
+    <Web3Context.Provider
+      value={{ connect, provider, isConnected: !!provider }}
+    >
+      {children}
+    </Web3Context.Provider>
+  );
 };
