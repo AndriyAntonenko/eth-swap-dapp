@@ -11,10 +11,3 @@ Check details about parts of the application here:
 
 - [@eth-swap/smart-contracts](./smart-contracts/README.md)
 - [@eth-swap/web-client](./web-client/README.MD)
-
-#### !TODO:
-
-1. Add loader during for swap
-2. Show allowance in swap box
-3. Show udt equivalent
-4. Show list of swaps
