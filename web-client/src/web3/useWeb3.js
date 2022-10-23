@@ -9,5 +9,6 @@ export const useWeb3 = () => {
     if (!provider) return null;
     return provider.getSigner().getAddress();
   }, [provider]);
+
   return { provider, connect, isConnected, getAddress };
 };
