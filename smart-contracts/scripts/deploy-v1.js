@@ -37,7 +37,7 @@ main().catch((error) => {
 async function deployERC20Token() {
   // One billion
   const Token = await hre.ethers.getContractFactory("ERC20Token");
-  const token = await Token.deploy(tokenSupply);
+  const token = await Token.deploy("SwapToken", "SWT", tokenSupply);
 
   await token.deployed();
   return [token.address, token];
