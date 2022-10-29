@@ -4,7 +4,19 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract ERC20Token is ERC20 {
-  constructor(string memory _name, string memory sybmol, uint256 _initialSupply) ERC20(_name, sybmol) {
+  uint8 private _decOverride;
+
+  constructor(
+    string memory _name,
+    string memory sybmol,
+    uint256 _initialSupply,
+    uint8 _decimals
+  ) ERC20(_name, sybmol) {
+    _decOverride = _decimals;
     _mint(msg.sender, _initialSupply);
+  }
+
+  function decimals() public view override returns (uint8) {
+    return _decOverride;
   }
 }

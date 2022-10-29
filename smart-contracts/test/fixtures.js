@@ -16,12 +16,12 @@ async function deployErc20Swap() {
   return await swap.deploy();
 }
 
-async function deployForSetup() {
+async function deployForSetup(baseDecimals = 18, quoteDecimals = 18) {
   const { rate, tokenSupply, owner, otherAccount } = await setupBaseSettings();
   const Token = await hre.ethers.getContractFactory("ERC20Token");
   const [baseToken, quoteToken] = await Promise.all([
-    Token.deploy("BASE", "BASE", tokenSupply),
-    Token.deploy("QUOTE", "QUOTE", tokenSupply),
+    Token.deploy("BASE", "BASE", tokenSupply, baseDecimals),
+    Token.deploy("QUOTE", "QUOTE", tokenSupply, quoteDecimals),
   ]);
 
   const swap = await deployErc20Swap();
@@ -32,24 +32,46 @@ async function deployForSetup() {
   return { baseToken, quoteToken, swap, rate, owner, otherAccount };
 }
 
-async function deployForErc20Swap() {
+async function deployForEstimate(baseDecimals = 18, quoteDecimals = 18) {
   const { rate, tokenSupply, owner, otherAccount } = await setupBaseSettings();
-
   const Token = await hre.ethers.getContractFactory("ERC20Token");
   const [baseToken, quoteToken] = await Promise.all([
-    Token.deploy("BASE", "BASE", tokenSupply),
-    Token.deploy("QUOTE", "QUOTE", tokenSupply),
+    Token.deploy("BASE", "BASE", tokenSupply, baseDecimals),
+    Token.deploy("QUOTE", "QUOTE", tokenSupply, quoteDecimals),
   ]);
 
   const swap = await deployErc20Swap();
+  const tx = await swap.changeRate(baseToken.address, quoteToken.address, rate);
+  await tx.wait();
+
+  return {
+    rate,
+    tokenSupply,
+    owner,
+    otherAccount,
+    swap,
+    baseToken,
+    quoteToken,
+    baseDecimals,
+    quoteDecimals,
+  };
+}
+
+async function deployForErc20Swap(baseDecimals = 18, quoteDecimals = 18) {
+  const {
+    rate,
+    tokenSupply,
+    owner,
+    otherAccount,
+    baseToken,
+    quoteToken,
+    swap,
+  } = await deployForEstimate(baseDecimals, quoteDecimals);
 
   await Promise.all([
     baseToken.transfer(swap.address, tokenSupply.div(2)),
     quoteToken.transfer(swap.address, tokenSupply.div(2)),
   ]);
-
-  const tx = await swap.changeRate(baseToken.address, quoteToken.address, rate);
-  await tx.wait();
 
   const baseAmount = hre.ethers.BigNumber.from(10).pow(18);
   const quoteAmount = baseAmount.mul(rate);
@@ -63,6 +85,8 @@ async function deployForErc20Swap() {
     rate,
     owner,
     otherAccount,
+    baseDecimals,
+    quoteDecimals,
     getOwnerBalances: () =>
       Promise.all([
         baseToken.balanceOf(owner.getAddress()),
@@ -73,5 +97,6 @@ async function deployForErc20Swap() {
 
 module.exports = {
   deployForSetup,
+  deployForEstimate,
   deployForErc20Swap,
 };

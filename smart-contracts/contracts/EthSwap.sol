@@ -23,6 +23,7 @@ contract EthSwap {
     uint rate
   );
 
+  // @TODO: configurable token
   constructor(address _tokenAddress, uint256 _rate) {
     token = ERC20Token(_tokenAddress);
     rate = _rate;

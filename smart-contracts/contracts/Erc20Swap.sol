@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
@@ -73,6 +73,22 @@ contract Erc20Swap is Ownable {
     _swapErc20Tokens(_baseAsset, _baseAmount, _quoteAsset, _quoteAmount);
   }
 
+  function estimateBaseAmount(
+    address _baseAsset,
+    address _quoteAsset,
+    uint256 _quoteAmount
+  ) assetExists(_baseAsset, _quoteAsset) noZeroAddress(_baseAsset, _quoteAsset) external view returns (uint256) {
+    return _calcBaseAmount(_baseAsset, _quoteAsset, _quoteAmount);
+  }
+
+  function estimateQuoteAmount(
+    address _baseAsset,
+    address _quoteAsset,
+    uint256 _baseAmount
+  ) assetExists(_baseAsset, _quoteAsset) noZeroAddress(_baseAsset, _quoteAsset) external view returns (uint256) {
+    return _calcQuoteAmount(_baseAsset, _quoteAsset, _baseAmount);
+  }
+
   function _swapErc20Tokens(
     address _chargeAsset,
     uint256 _chargeAmount,
@@ -84,13 +100,16 @@ contract Erc20Swap is Ownable {
     emit Purchase(msg.sender, _receiveAsset, _chargeAsset, _receiveAmount, _chargeAmount);
   }
 
-
   function _calcBaseAmount(
     address _baseAsset,
     address _quoteAsset,
     uint256 _quoteAmount
   ) internal view returns (uint256) {
-    return SafeMath.div(_quoteAmount, rates[_baseAsset][_quoteAsset]);
+    int _decimalsDiff = _getDecimalsDiff(_baseAsset, _quoteAsset);
+    uint256 res = SafeMath.div(_quoteAmount, rates[_baseAsset][_quoteAsset]);
+    if (_decimalsDiff == 0) return res;
+    if (_decimalsDiff > 0) return SafeMath.mul(res, 10 ** uint256(_decimalsDiff));
+    return SafeMath.div(res, 10 ** uint256(-1 * _decimalsDiff));
   }
 
   function _calcQuoteAmount(
@@ -98,17 +117,27 @@ contract Erc20Swap is Ownable {
     address _quoteAsset,
     uint256 _baseAmount
   ) internal view returns (uint256) {
-    return SafeMath.mul(rates[_baseAsset][_quoteAsset], _baseAmount);
+    int _decimalsDiff = _getDecimalsDiff(_baseAsset, _quoteAsset);
+    uint256 res = SafeMath.mul(rates[_baseAsset][_quoteAsset], _baseAmount);
+    if (_decimalsDiff == 0) return res;
+    if (_decimalsDiff > 0) return SafeMath.div(res, 10 ** uint256(_decimalsDiff));
+    return SafeMath.mul(res, 10 ** uint256(-1 * _decimalsDiff));
+  }
+
+  function _getDecimalsDiff(address _baseAsset, address _quoteAsset) internal view returns (int) {
+    uint _baseDecimals = ERC20(_baseAsset).decimals();
+    uint _quoteDecimals = ERC20(_quoteAsset).decimals();
+    return int(_baseDecimals) - int(_quoteDecimals);
   }
 
   function _sendErc20(address _asset, uint256 _amount, address _to) internal {
-    require(IERC20(_asset).balanceOf(address(this)) >= _amount, "Not enough liquidity");
-    IERC20(_asset).transfer(_to, _amount);
+    require(ERC20(_asset).balanceOf(address(this)) >= _amount, "Not enough liquidity");
+    ERC20(_asset).transfer(_to, _amount);
   }
 
   function _chargeErc20(address _asset, uint256 _amount, address _from) internal {
-    require(IERC20(_asset).balanceOf(_from) >= _amount, "Not enough balance");
-    IERC20(_asset).transferFrom(_from, address(this), _amount);
+    require(ERC20(_asset).balanceOf(_from) >= _amount, "Not enough balance");
+    ERC20(_asset).transferFrom(_from, address(this), _amount);
   }
 
   receive() external payable {}

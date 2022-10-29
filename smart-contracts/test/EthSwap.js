@@ -15,7 +15,7 @@ describe("EthSwap", function () {
     const [owner, otherAccount] = await hre.ethers.getSigners();
 
     const Token = await hre.ethers.getContractFactory("ERC20Token");
-    const token = await Token.deploy("SwapToken", "SWT", tokenSupply);
+    const token = await Token.deploy("SwapToken", "SWT", tokenSupply, 18);
 
     const EthSwap = await hre.ethers.getContractFactory("EthSwap");
     const ethSwap = await EthSwap.deploy(token.address, rate);
