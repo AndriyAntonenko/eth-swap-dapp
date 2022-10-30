@@ -1,5 +1,5 @@
 const hre = require("hardhat");
-const { saveDeploymentInfo } = require("./helpers");
+const { saveDeploymentInfo, logDeploymentInfo } = require("./helpers");
 
 async function deployEthSwapV2() {
   const EthSwapV2 = await hre.ethers.getContractFactory("EthSwapV2");
@@ -9,7 +9,10 @@ async function deployEthSwapV2() {
 }
 
 deployEthSwapV2()
-  .then(({ address, hash }) => saveDeploymentInfo("EthSwapV2", address, hash))
+  .then(({ address, hash }) => {
+    logDeploymentInfo("EthSwapV2, address, hash");
+    return saveDeploymentInfo("EthSwapV2", address, hash);
+  })
   .catch((error) => {
     console.error(error);
     process.exitCode = 1;
