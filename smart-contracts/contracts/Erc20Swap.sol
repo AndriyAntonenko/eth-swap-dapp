@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 
-/// @title This is smart-contract based erc20 tokens exchange. It is part of my learning project
+/// @title This is smart-contract-based erc20 tokens exchange. It is part of my learning project
 /// @author Andrii Antonenko (https://github.com/AndriyAntonenko)
 /// @notice You are cool, thanks for reviewing this code. You can suggest any improvements.
 /// @dev You are cool too, thanks for reviewing this code. You can suggest any improvements.

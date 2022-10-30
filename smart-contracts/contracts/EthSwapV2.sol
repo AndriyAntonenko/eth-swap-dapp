@@ -6,6 +6,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "hardhat/console.sol";
 
+/// @title This smart-contract allows user to buy or sell erc20 tokens for ethereum
+/// @author Andrii Antonenko (https://github.com/AndriyAntonenko)
+/// @notice You are cool, thanks for reviewing this code. You can suggest any improvements.
+/// @dev You are cool too, thanks for reviewing this code. You can suggest any improvements.
+/// I will be happy to know your opinion
 contract EthSwapV2 is Ownable {
   using SafeMath for uint256;
 
@@ -50,6 +55,8 @@ contract EthSwapV2 is Ownable {
     return rates[_token].sale;
   }
 
+  /// @notice Buy tokens for the eth. Make sure that your token exists. Using purchase rate
+  /// @param _token erc20 token address (should be stored in rates state variable)
   function buyTokens(address _token) noZeroAddress(_token) external payable {
     uint256 _rate = rates[_token].purchase;
     require(_rate > 0, "Rate is zero");
@@ -59,19 +66,17 @@ contract EthSwapV2 is Ownable {
     emit TokenPurchased(msg.sender, _token, _tokensAmount, _rate);
   }
 
-
+  /// @notice Sell tokens in order to receive eth. Using sale rate
+  /// @param _token erc20 token address (should be stored in rates state variable)
+  /// @param _amount amount of tokens to sale
   function sellTokens(address _token, uint256 _amount) external {
     require(ERC20(_token).balanceOf(msg.sender) >= _amount, "Not enough tokens");
     uint256 _rate = rates[_token].sale;
     require(_rate > 0, "Rate is zero");
-    
     uint256 _eth = SafeMath.div(_amount, _rate);
-    
     require(address(this).balance >= _eth, "Not enough liquidity");
-
     ERC20(_token).transferFrom(msg.sender, address(this), _amount);
     payable(msg.sender).transfer(_eth);
-
     emit TokenSold(msg.sender, _token, _amount, _rate);
   }
 
