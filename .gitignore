@@ -30,4 +30,4 @@ yarn-debug.log*
 yarn-error.log*
 
 # Smart contracts deploy info
-addresses.json
+smart-contracts/deployments
