@@ -6,11 +6,11 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 
-/**
- * Two types of operations: SELL and BUY
- * Two types of amount: base or quote
- * All operations applied to base asset
- */
+/// @title This is smart-contract based erc20 tokens exchange. It is part of my learning project
+/// @author Andrii Antonenko (https://github.com/AndriyAntonenko)
+/// @notice You are cool, thanks for reviewing this code. You can suggest any improvements.
+/// @dev You are cool too, thanks for reviewing this code. You can suggest any improvements.
+/// I will be happy to know your opinion
 contract Erc20Swap is Ownable {
   using SafeMath for uint256;
 
@@ -19,11 +19,18 @@ contract Erc20Swap is Ownable {
     address indexed receivedAsset,
     address indexed chargedAsset,
     uint256 receivedAmount,
-    uint256 chargedAmount
+    uint256 chargedAmount,
+    address baseAsset,
+    uint256 rate
   );
 
   mapping(address => mapping(address => uint256)) public rates;
 
+  /// @notice Add exchange pair of erc20 tokens with provided rate
+  /// @dev n of _baseAsset * _rate = m of _quoteAssset
+  /// @param _baseAsset address of base erc20 token
+  /// @param _quoteAsset address of quote erc20 token
+  /// @param _rate current rate (price)
   function changeRate(
     address _baseAsset,
     address _quoteAsset,
@@ -32,10 +39,16 @@ contract Erc20Swap is Ownable {
     rates[_baseAsset][_quoteAsset] = _rate;
   }
 
-  function getRate(address _baseAsset, address _quoteAsset) external view returns (uint256) {
+  /// @notice Get rate(price) for exchange pair
+  function getRate(address _baseAsset, address _quoteAsset) public view returns (uint256) {
     return rates[_baseAsset][_quoteAsset];
   }
 
+  /// @notice Buy base asset using base asset amount. Emits Purchase event
+  /// @dev Calculate _quoteAsset amount, charge _quoteAsset, send _baseAsset and emit Purchase event
+  /// @param _baseAsset erc20 token address
+  /// @param _quoteAsset erc20 token address
+  /// @param _baseAmount amount of _baseAsset, that you want to buy
   function buyByBaseAmount(
     address _baseAsset,
     address _quoteAsset,
@@ -43,8 +56,23 @@ contract Erc20Swap is Ownable {
   ) assetExists(_baseAsset, _quoteAsset) noZeroAddress(_baseAsset, _quoteAsset) external payable {
     uint256 _quoteAmount = _calcQuoteAmount(_baseAsset, _quoteAsset, _baseAmount);
     _swapErc20Tokens(_quoteAsset, _quoteAmount, _baseAsset, _baseAmount);
+
+    emit Purchase(
+      msg.sender,
+      _baseAsset,
+      _quoteAsset,
+      _baseAmount,
+      _quoteAmount,
+      _baseAsset,
+      getRate(_baseAsset, _quoteAsset)
+    );
   }
 
+  /// @notice Buy base asset using quote asset amount. Emits Purchase event
+  /// @dev Calculate _baseAsset amount, charge _quoteAsset, send _baseAsset and emit Purchase event
+  /// @param _baseAsset erc20 token address
+  /// @param _quoteAsset erc20 token address
+  /// @param _quoteAmount amount of _quoteAsset, that you want to spend
   function buyByQuoteAmount(
     address _baseAsset,
     address _quoteAsset,
@@ -52,8 +80,23 @@ contract Erc20Swap is Ownable {
   ) assetExists(_baseAsset, _quoteAsset) noZeroAddress(_baseAsset, _quoteAsset) external payable  {
     uint256 _baseAmount = _calcBaseAmount(_baseAsset, _quoteAsset, _quoteAmount);
     _swapErc20Tokens(_quoteAsset, _quoteAmount, _baseAsset, _baseAmount);
+
+    emit Purchase(
+      msg.sender,
+      _baseAsset,
+      _quoteAsset,
+      _baseAmount,
+      _quoteAmount,
+      _baseAsset,
+      getRate(_baseAsset, _quoteAsset)
+    );
   }
   
+  /// @notice Sell base asset using base asset amount. Emits Purchase event
+  /// @dev Calculate _quoteAsset amount, charge _baseAsset, send _quoteAsset and emit Purchase event
+  /// @param _baseAsset erc20 token address
+  /// @param _quoteAsset erc20 token address
+  /// @param _baseAmount amount of _baseAsset, that you want to sell
   function sellByBaseAmount(
     address _baseAsset,
     address _quoteAsset,
@@ -62,8 +105,23 @@ contract Erc20Swap is Ownable {
     uint256 _quoteAmount;
     _quoteAmount = _calcQuoteAmount(_baseAsset, _quoteAsset, _baseAmount);
     _swapErc20Tokens(_baseAsset, _baseAmount, _quoteAsset, _quoteAmount);
+
+    emit Purchase(
+      msg.sender,
+      _quoteAsset,
+      _baseAsset,
+      _quoteAmount,
+      _baseAmount,
+      _baseAsset,
+      getRate(_baseAsset, _quoteAsset)
+    );
   }
 
+  /// @notice Sell base asset using quote asset amount. Emits Purchase event
+  /// @dev Calculate _baseAsset amount, charge _baseAsset, send _quoteAsset and emit Purchase event
+  /// @param _baseAsset erc20 token address
+  /// @param _quoteAsset erc20 token address
+  /// @param _quoteAmount amount of _quoteAsset, that you want to receive
   function sellByQuoteAmount(
     address _baseAsset,
     address _quoteAsset,
@@ -71,8 +129,23 @@ contract Erc20Swap is Ownable {
   ) assetExists(_baseAsset, _quoteAsset) noZeroAddress(_baseAsset, _quoteAsset) external payable {
     uint256 _baseAmount = _calcBaseAmount(_baseAsset, _quoteAsset, _quoteAmount);
     _swapErc20Tokens(_baseAsset, _baseAmount, _quoteAsset, _quoteAmount);
+
+    emit Purchase(
+      msg.sender,
+      _quoteAsset,
+      _baseAsset,
+      _quoteAmount,
+      _baseAmount,
+      _baseAsset,
+      getRate(_baseAsset, _quoteAsset)
+    );
   }
 
+  /// @notice Estimates base amount based on quote amount. Be aware, that rate could be changed at any time
+  /// @param _baseAsset erc20 token address
+  /// @param _quoteAsset erc20 token address
+  /// @param _quoteAmount base amount (in deciamals)
+  /// @return _baseAmount
   function estimateBaseAmount(
     address _baseAsset,
     address _quoteAsset,
@@ -81,6 +154,11 @@ contract Erc20Swap is Ownable {
     return _calcBaseAmount(_baseAsset, _quoteAsset, _quoteAmount);
   }
 
+  /// @notice Estimates quote amount based on base amount. Be aware, that rate could be changed at any time
+  /// @param _baseAsset erc20 token address
+  /// @param _quoteAsset erc20 token address
+  /// @param _baseAmount base amount (in deciamals)
+  /// @return _quoteAmount
   function estimateQuoteAmount(
     address _baseAsset,
     address _quoteAsset,
@@ -97,9 +175,13 @@ contract Erc20Swap is Ownable {
   ) internal {
     _chargeErc20(_chargeAsset, _chargeAmount, msg.sender);
     _sendErc20(_receiveAsset, _receiveAmount, msg.sender);
-    emit Purchase(msg.sender, _receiveAsset, _chargeAsset, _receiveAmount, _chargeAmount);
   }
 
+  /// @dev Calculate base amount from quote amount
+  /// @param _baseAsset erc20 token address
+  /// @param _quoteAsset erc20 token address
+  /// @param _quoteAmount base amount (in deciamals)
+  /// @return _baseAmount
   function _calcBaseAmount(
     address _baseAsset,
     address _quoteAsset,
@@ -112,6 +194,12 @@ contract Erc20Swap is Ownable {
     return SafeMath.div(res, 10 ** uint256(-1 * _decimalsDiff));
   }
 
+
+  /// @dev Calculate quote amount from base amount
+  /// @param _baseAsset erc20 token address
+  /// @param _quoteAsset erc20 token address
+  /// @param _baseAmount base amount (in deciamals)
+  /// @return _quoteAmount
   function _calcQuoteAmount(
     address _baseAsset,
     address _quoteAsset,
@@ -124,23 +212,34 @@ contract Erc20Swap is Ownable {
     return SafeMath.mul(res, 10 ** uint256(-1 * _decimalsDiff));
   }
 
+  /// @dev _baseAsset.decimals - _quoteAsset.decimals
+  /// @param _baseAsset erc20 token address
+  /// @param _quoteAsset erc20 token address
+  /// @return difference base erc20 decimals and quote erc20 decimals
   function _getDecimalsDiff(address _baseAsset, address _quoteAsset) internal view returns (int) {
     uint _baseDecimals = ERC20(_baseAsset).decimals();
     uint _quoteDecimals = ERC20(_quoteAsset).decimals();
     return int(_baseDecimals) - int(_quoteDecimals);
   }
 
+
+  /// @dev Send erc20 asset from contract balance to provided address
+  /// @param _asset erc20 token address
+  /// @param _amount amount to send
+  /// @param _to address to send
   function _sendErc20(address _asset, uint256 _amount, address _to) internal {
     require(ERC20(_asset).balanceOf(address(this)) >= _amount, "Not enough liquidity");
     ERC20(_asset).transfer(_to, _amount);
   }
 
+  /// @dev Charge erc20 asset from end provided address
+  /// @param _asset erc20 token address
+  /// @param _amount amount to charge
+  /// @param _from address to charge from
   function _chargeErc20(address _asset, uint256 _amount, address _from) internal {
     require(ERC20(_asset).balanceOf(_from) >= _amount, "Not enough balance");
     ERC20(_asset).transferFrom(_from, address(this), _amount);
   }
-
-  receive() external payable {}
 
   modifier noZeroAddress(address _baseAsset, address _quoteAsset) {
     require(_baseAsset != address(0) || _quoteAsset != address(0), "Cannot use zero address");
