@@ -10,7 +10,7 @@ async function deployEthSwapV2() {
 
 deployEthSwapV2()
   .then(({ address, hash }) => {
-    logDeploymentInfo("EthSwapV2, address, hash");
+    logDeploymentInfo("EthSwapV2", address, hash);
     return saveDeploymentInfo("EthSwapV2", address, hash);
   })
   .catch((error) => {

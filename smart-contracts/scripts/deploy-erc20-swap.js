@@ -11,7 +11,6 @@ async function deployErc20Swap() {
 deployErc20Swap()
   .then(({ address, hash }) => {
     logDeploymentInfo("Erc20Swap", address, hash);
-    console.info(address, hash);
     return saveDeploymentInfo("Erc20Swap", address, hash);
   })
   .catch((error) => {
