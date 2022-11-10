@@ -24,7 +24,17 @@ contract Erc20Swap is Ownable {
     uint256 rate
   );
 
-  mapping(address => mapping(address => uint256)) public rates;
+  struct Pair {
+    address baseAsset;
+    address quoteAsset;
+    uint256 rate;
+  }
+
+  Pair[] public pairs;
+
+  function getPairs() external view returns(Pair[] memory) {
+    return pairs;
+  }
 
   /// @notice Add exchange pair of erc20 tokens with provided rate
   /// @dev n of _baseAsset * _rate = m of _quoteAssset
@@ -36,12 +46,28 @@ contract Erc20Swap is Ownable {
     address _quoteAsset,
     uint256 _rate
   ) external onlyOwner noZeroAddress(_baseAsset, _quoteAsset) {
-    rates[_baseAsset][_quoteAsset] = _rate;
+    int index = _getPairIndex(_baseAsset, _quoteAsset);
+    if (index != -1) {
+      pairs[uint(index)].rate = _rate;
+      return;
+    }
+
+    pairs.push(Pair(_baseAsset, _quoteAsset, _rate));
+  }
+
+  function _getPairIndex(address _baseAsset, address _quoteAsset) private view returns (int) {
+    for (uint i = 0; i < pairs.length; i++) {
+      Pair memory p = pairs[i];
+      if (p.baseAsset == _baseAsset || p.quoteAsset == _quoteAsset) return int(i);
+    }
+    return -1;
   }
 
   /// @notice Get rate(price) for exchange pair
   function getRate(address _baseAsset, address _quoteAsset) public view returns (uint256) {
-    return rates[_baseAsset][_quoteAsset];
+    int index = _getPairIndex(_baseAsset, _quoteAsset);
+    if (index == -1) return 0;
+    return pairs[uint(index)].rate;
   }
 
   /// @notice Buy base asset using base asset amount. Emits Purchase event
@@ -188,7 +214,8 @@ contract Erc20Swap is Ownable {
     uint256 _quoteAmount
   ) internal view returns (uint256) {
     int _decimalsDiff = _getDecimalsDiff(_baseAsset, _quoteAsset);
-    uint256 res = SafeMath.div(_quoteAmount, rates[_baseAsset][_quoteAsset]);
+    uint256 rate = getRate(_baseAsset, _quoteAsset);
+    uint256 res = SafeMath.div(_quoteAmount, rate);
     if (_decimalsDiff == 0) return res;
     if (_decimalsDiff > 0) return SafeMath.mul(res, 10 ** uint256(_decimalsDiff));
     return SafeMath.div(res, 10 ** uint256(-1 * _decimalsDiff));
@@ -206,7 +233,8 @@ contract Erc20Swap is Ownable {
     uint256 _baseAmount
   ) internal view returns (uint256) {
     int _decimalsDiff = _getDecimalsDiff(_baseAsset, _quoteAsset);
-    uint256 res = SafeMath.mul(rates[_baseAsset][_quoteAsset], _baseAmount);
+    uint256 rate = getRate(_baseAsset, _quoteAsset);
+    uint256 res = SafeMath.mul(rate, _baseAmount);
     if (_decimalsDiff == 0) return res;
     if (_decimalsDiff > 0) return SafeMath.div(res, 10 ** uint256(_decimalsDiff));
     return SafeMath.mul(res, 10 ** uint256(-1 * _decimalsDiff));
@@ -247,7 +275,7 @@ contract Erc20Swap is Ownable {
   }
 
   modifier assetExists(address _baseAsset, address _quoteAsset) {
-    require(rates[_baseAsset][_quoteAsset] != 0, "Assets pair not exists");
+    require(_getPairIndex(_baseAsset, _quoteAsset) != -1, "Assets pair not exists");
     _;
   }
 }
