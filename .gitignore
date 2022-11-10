@@ -28,6 +28,3 @@ artifacts
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# Smart contracts deploy info
-smart-contracts/deployments
