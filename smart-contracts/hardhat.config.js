@@ -1,6 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
+require("./tasks/deploy-mintable-erc20");
 require("./tasks/erc20-swap-chown");
 
 /** @type import('hardhat/config').HardhatUserConfig */

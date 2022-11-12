@@ -1,6 +1,5 @@
-const { task } = require("hardhat/config");
-
 require("@nomicfoundation/hardhat-toolbox");
+const { task } = require("hardhat/config");
 
 task("erc20-swap-chown", "Change Erc20Swap owner")
   .addParam("address", "Erc20Swap contract address")

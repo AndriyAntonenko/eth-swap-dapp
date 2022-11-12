@@ -8,10 +8,10 @@ contract ERC20Token is ERC20 {
 
   constructor(
     string memory _name,
-    string memory sybmol,
+    string memory _sybmol,
     uint256 _initialSupply,
     uint8 _decimals
-  ) ERC20(_name, sybmol) {
+  ) ERC20(_name, _sybmol) {
     _decOverride = _decimals;
     _mint(msg.sender, _initialSupply);
   }

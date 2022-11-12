@@ -25,9 +25,10 @@ async function deployEthSwap() {
     }),
   ]);
 
-  const tx = await swap.changeRate(token.address, {
+  const tx = await swap.changeRate({
     purchase: purchaseRate,
     sale: saleRate,
+    token: token.address,
   });
   await tx.wait();
 
