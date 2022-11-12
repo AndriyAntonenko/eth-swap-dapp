@@ -3,6 +3,7 @@ require("dotenv").config();
 
 require("./tasks/deploy-mintable-erc20");
 require("./tasks/erc20-swap-chown");
+require("./tasks/eth-swap-chown");
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
