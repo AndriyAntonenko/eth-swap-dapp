@@ -41,7 +41,11 @@ async function deployForEstimate(baseDecimals = 18, quoteDecimals = 18) {
   ]);
 
   const swap = await deployErc20Swap();
-  const tx = await swap.changeRate(baseToken.address, quoteToken.address, rate);
+  const tx = await swap.changeRate(
+    baseToken.address,
+    quoteToken.address,
+    hre.ethers.BigNumber.from(rate).mul(hre.ethers.BigNumber.from(10).pow(18))
+  );
   await tx.wait();
 
   return {

@@ -12,6 +12,7 @@ import "hardhat/console.sol";
 /// @dev You are cool too, thanks for reviewing this code. You can suggest any improvements.
 /// I will be happy to know your opinion
 contract Erc20Swap is Ownable {
+  uint8 immutable public rateDecimals = 18;
   using SafeMath for uint256;
 
   event Purchase(
@@ -214,11 +215,13 @@ contract Erc20Swap is Ownable {
     uint256 _quoteAmount
   ) internal view returns (uint256) {
     int _decimalsDiff = _getDecimalsDiff(_baseAsset, _quoteAsset);
-    uint256 rate = getRate(_baseAsset, _quoteAsset);
-    uint256 res = SafeMath.div(_quoteAmount, rate);
-    if (_decimalsDiff == 0) return res;
-    if (_decimalsDiff > 0) return SafeMath.mul(res, 10 ** uint256(_decimalsDiff));
-    return SafeMath.div(res, 10 ** uint256(-1 * _decimalsDiff));
+    
+    uint256 _rate = getRate(_baseAsset, _quoteAsset);
+    uint256 _res = SafeMath.div(SafeMath.mul(_quoteAmount, 10 ** rateDecimals), _rate);
+    
+    if (_decimalsDiff == 0) return _res;
+    if (_decimalsDiff > 0) return SafeMath.mul(_res, 10 ** uint256(_decimalsDiff));
+    return SafeMath.div(_res, 10 ** uint256(-1 * _decimalsDiff));
   }
 
 
@@ -233,11 +236,13 @@ contract Erc20Swap is Ownable {
     uint256 _baseAmount
   ) internal view returns (uint256) {
     int _decimalsDiff = _getDecimalsDiff(_baseAsset, _quoteAsset);
-    uint256 rate = getRate(_baseAsset, _quoteAsset);
-    uint256 res = SafeMath.mul(rate, _baseAmount);
-    if (_decimalsDiff == 0) return res;
-    if (_decimalsDiff > 0) return SafeMath.div(res, 10 ** uint256(_decimalsDiff));
-    return SafeMath.mul(res, 10 ** uint256(-1 * _decimalsDiff));
+    
+    uint256 _rate = getRate(_baseAsset, _quoteAsset);
+    uint256 _res = SafeMath.div(SafeMath.mul(_rate, _baseAmount), 10 ** rateDecimals);
+
+    if (_decimalsDiff == 0) return _res;
+    if (_decimalsDiff > 0) return SafeMath.div(_res, 10 ** uint256(_decimalsDiff));
+    return SafeMath.mul(_res, 10 ** uint256(-1 * _decimalsDiff));
   }
 
   /// @dev _baseAsset.decimals - _quoteAsset.decimals
