@@ -1,0 +1,11 @@
+.form {
+  max-width: 450px !important;
+}
+
+.form_label {
+  text-align: initial;
+}
+
+.form_warn {
+  text-align: start !important;
+}

@@ -3,6 +3,7 @@
   "description": "Experimental project to investigate Hardhat and ethers.js abilities",
   "workspaces": [
     "smart-contracts",
-    "web-client"
+    "web-client",
+    "web-app"
   ]
 }
