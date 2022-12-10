@@ -3,6 +3,7 @@ const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
+const { BigNumber } = ethers;
 const { deployEthSwap } = require("./fixtures");
 
 describe("EthSwap v2", function () {
@@ -19,7 +20,9 @@ describe("EthSwap v2", function () {
     const result = await swap.getPurchaseRate(token.address);
 
     expect(ethers.BigNumber.isBigNumber(result)).to.be.equal(true);
-    expect(result.toNumber()).to.be.equal(purchaseRate);
+    expect(
+      result.eq(BigNumber.from(purchaseRate).mul(BigNumber.from(10).pow(18)))
+    ).to.be.equal(true);
   });
 
   it("Should return correct token sale rate", async () => {
@@ -27,7 +30,9 @@ describe("EthSwap v2", function () {
     const result = await swap.getSaleRate(token.address);
 
     expect(ethers.BigNumber.isBigNumber(result)).to.be.equal(true);
-    expect(result.toNumber()).to.be.equal(saleRate);
+    expect(
+      result.eq(BigNumber.from(saleRate).mul(BigNumber.from(10).pow(18)))
+    ).to.be.equal(true);
   });
 
   it("Should purchase erc20 for eth tokens successfully", async () => {
@@ -69,7 +74,7 @@ describe("EthSwap v2", function () {
     );
 
     const tokensAmount = ethers.BigNumber.from(10).pow(18).mul(10); // 10 tokens
-    const expectedEthAmount = tokensAmount.div(saleRate);
+    const expectedEthAmount = tokensAmount.mul(saleRate);
 
     const ownerBalancesBefore = await getBalances(owner.address);
     const swapBalancesBefore = await getBalances(swap.address);

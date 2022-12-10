@@ -26,8 +26,8 @@ async function deployEthSwap() {
   ]);
 
   const tx = await swap.changeRate({
-    purchase: purchaseRate,
-    sale: saleRate,
+    purchase: hre.ethers.utils.parseEther(purchaseRate.toString()),
+    sale: hre.ethers.utils.parseEther(saleRate.toString()),
     token: token.address,
   });
   await tx.wait();

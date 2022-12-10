@@ -12,6 +12,7 @@ import "hardhat/console.sol";
 /// @dev You are cool too, thanks for reviewing this code. You can suggest any improvements.
 /// I will be happy to know your opinion
 contract EthSwapV2 is Ownable {
+  uint8 immutable public priceDecimals = 18;
   using SafeMath for uint256;
 
   struct Price {
@@ -73,7 +74,15 @@ contract EthSwapV2 is Ownable {
   function buyTokens(address _token) noZeroAddress(_token) external payable {
     uint256 _rate = getPurchaseRate(_token);
     require(_rate > 0, "Rate is zero");
-    uint256 _tokensAmount = _rate * msg.value;
+    ERC20 _tokenContract = ERC20(_token);
+    uint _tokenDecimals = uint(_tokenContract.decimals());
+
+    int _decimalsDiff = 18 - int(_tokenDecimals);
+    
+    uint256 _tokensAmount = SafeMath.div(SafeMath.mul(_rate, msg.value), 10 ** priceDecimals);
+    if (_decimalsDiff > 0) _tokensAmount = SafeMath.div(_tokensAmount, 10 ** uint(_decimalsDiff));
+    if (_decimalsDiff < 0) _tokensAmount = SafeMath.mul(_tokensAmount, 10 ** uint256(-1 * _decimalsDiff));
+
     require(ERC20(_token).balanceOf(address(this)) >= _tokensAmount);
     ERC20(_token).transfer(msg.sender, _tokensAmount);
     emit TokenPurchased(msg.sender, _token, _tokensAmount, _rate);
@@ -83,12 +92,21 @@ contract EthSwapV2 is Ownable {
   /// @param _token erc20 token address (should be stored in rates state variable)
   /// @param _amount amount of tokens to sale
   function sellTokens(address _token, uint256 _amount) external {
-    require(ERC20(_token).balanceOf(msg.sender) >= _amount, "Not enough tokens");
     uint256 _rate = getSaleRate(_token);
     require(_rate > 0, "Rate is zero");
-    uint256 _eth = SafeMath.div(_amount, _rate);
+    ERC20 _tokenContract = ERC20(_token);
+    require(_tokenContract.balanceOf(msg.sender) >= _amount, "Not enough tokens");
+    uint _tokenDecimals = uint(_tokenContract.decimals());
+
+    int _decimalsDiff = 18 - int(_tokenDecimals);
+    
+    uint256 _eth = SafeMath.div(SafeMath.mul(_rate, _amount), 10 ** priceDecimals);
+    if (_decimalsDiff > 0) _eth = SafeMath.div(_eth, 10 ** uint(_decimalsDiff));
+    if (_decimalsDiff < 0) _eth = SafeMath.mul(_eth, 10 ** uint256(-1 * _decimalsDiff));
+
     require(address(this).balance >= _eth, "Not enough liquidity");
-    ERC20(_token).transferFrom(msg.sender, address(this), _amount);
+
+    _tokenContract.transferFrom(msg.sender, address(this), _amount);
     payable(msg.sender).transfer(_eth);
     emit TokenSold(msg.sender, _token, _amount, _rate);
   }
