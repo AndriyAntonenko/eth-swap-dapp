@@ -1,9 +1,9 @@
 import { Form, Input, Button, Header } from "semantic-ui-react";
 
-import { useEthSwapPairForm } from "./hooks/useEthSwapPairForm";
-import styles from "./styles.module.css";
+import { useEthSwapPairForm } from "./useForm";
+import styles from "../styles.module.css";
 
-export const EthSwapPairForm = () => {
+export const EthForm = () => {
   const {
     changePurchaseRate,
     changeSaleRate,

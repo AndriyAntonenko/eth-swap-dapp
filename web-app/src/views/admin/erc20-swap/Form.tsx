@@ -1,9 +1,9 @@
 import { Form, Input, Button, Message, Header } from "semantic-ui-react";
 
-import { useErc20SwapPairForm } from "./hooks/useErc20SwapPairForm";
-import styles from "./styles.module.css";
+import { useErc20SwapPairForm } from "./useForm";
+import styles from "../styles.module.css";
 
-export const Erc20SwapPairForm = () => {
+export const Erc20Form = () => {
   const {
     changeBaseAsset,
     changeQuoteAsset,
@@ -36,7 +36,7 @@ export const Erc20SwapPairForm = () => {
         header="Pay attention"
         list={[
           "Ethereum network will charge fee",
-          "Rate, returned from smart contract call could be different",
+          "Rate in the smart contract stored as integer with 18 decimals",
         ]}
       />
       <Form.Field fluid primary onClick={submit} control={Button}>

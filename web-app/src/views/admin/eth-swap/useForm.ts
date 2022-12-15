@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { utils } from "ethers";
 
-import { useProvider } from "../../../../shared/web3/hooks";
-import { useAppDispatch } from "../../../../shared/state/hooks";
+import { useProvider } from "../../../shared/web3/hooks";
+import { useAppDispatch } from "../../../shared/state/hooks";
 import {
   addEthErc20Pair,
   getEthErc20Pairs,
-} from "../../../../shared/state/slices/eth-erc20-pairs";
-import { useAppSelector } from "../../../../shared/state/hooks";
+} from "../../../shared/state/slices/eth-erc20-pairs";
+import { useAppSelector } from "../../../shared/state/hooks";
 
 export const useEthSwapPairForm = () => {
   const dispatch = useAppDispatch();

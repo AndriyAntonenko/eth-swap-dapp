@@ -1,22 +1,22 @@
 import { Grid, Header } from "semantic-ui-react";
 
-import { EthSwapPairForm } from "./forms";
-import { EthErc20Table } from "./tables";
-import styles from "./styles.module.css";
+import { EthForm } from "./Form";
+import { EthTable } from "./Table";
+import styles from "../styles.module.css";
 
-export const EthErc20Swap = () => {
+export const EthSwap = () => {
   return (
     <Grid padded>
       <Grid.Row>
         <Grid.Column width={6}>
-          <EthSwapPairForm />
+          <EthForm />
         </Grid.Column>
         <Grid.Column width={10}>
           <div>
             <Header className={styles.admin_section__header}>
               List of already available exchange pairs
             </Header>
-            <EthErc20Table />
+            <EthTable />
           </div>
         </Grid.Column>
       </Grid.Row>

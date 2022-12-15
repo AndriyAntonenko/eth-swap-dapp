@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { utils } from "ethers";
 
-import { useProvider } from "../../../../shared/web3/hooks";
-import { useAppDispatch } from "../../../../shared/state/hooks";
-import { useAppSelector } from "../../../../shared/state/hooks";
+import { useProvider } from "../../../shared/web3/hooks";
+import { useAppDispatch } from "../../../shared/state/hooks";
+import { useAppSelector } from "../../../shared/state/hooks";
 import {
   addErc20Pair,
   getErc20Pairs,
-} from "../../../../shared/state/slices/erc20-pairs";
+} from "../../../shared/state/slices/erc20-pairs";
 
 export const useErc20SwapPairForm = () => {
   const isSubmitting = useAppSelector((state: any) => state.erc20Pairs.adding);

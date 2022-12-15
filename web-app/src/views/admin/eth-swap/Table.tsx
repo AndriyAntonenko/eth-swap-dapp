@@ -1,7 +1,7 @@
 import { Label, Popup, Table } from "semantic-ui-react";
 import { useEthErc20Pairs } from "../../../shared/hooks";
 
-export const EthErc20Table = () => {
+export const EthTable = () => {
   const { list } = useEthErc20Pairs();
 
   return (

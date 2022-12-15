@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Grid } from "semantic-ui-react";
 
 import { AdminMenu } from "./Menu";
-import { ERC20Swap } from "./Erc20Swap";
-import { EthErc20Swap } from "./EthErc20Swap";
+import { EthSwap } from "./eth-swap";
+import { ERC20Swap } from "./erc20-swap";
 import { Board } from "./types";
 
 export const Component = () => {
@@ -20,7 +20,7 @@ export const Component = () => {
           />
         </Grid.Column>
         <Grid.Column>
-          {activeBoard === Board.Erc20 ? <ERC20Swap /> : <EthErc20Swap />}
+          {activeBoard === Board.Erc20 ? <ERC20Swap /> : <EthSwap />}
         </Grid.Column>
       </Grid.Row>
     </Grid>
